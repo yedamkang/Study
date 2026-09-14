@@ -1,0 +1,80 @@
+# Chapter 5: Support Vector Machines
+Hands-On Machine Learning | Date: 2026-09-14 | Author: Yedam Kang
+
+## 1. Linear SVM Classification
+
+SVM tries to find the decision boundary that has the **largest possible margin** (gap) between the two classes, using only the closest points (**support vectors**) to define that boundary.
+
+```python
+from sklearn.svm import LinearSVC
+from sklearn.preprocessing import StandardScaler
+from sklearn.pipeline import make_pipeline
+
+svm_clf = make_pipeline(StandardScaler(), LinearSVC(C=1, random_state=42))
+# StandardScaler: SVMs are sensitive to feature scale, so we normalize the data first
+# C: controls the margin's "softness" -- smaller C = wider margin but more tolerance for errors
+
+svm_clf.fit(X, y)
+```
+
+- **Hard margin**: forces a perfect separation with zero errors (very sensitive to outliers)
+- **Soft margin**: allows some misclassifications in exchange for a wider, more generalizable margin (controlled by `C`)
+
+## 2. Nonlinear SVM Classification
+
+When data can't be separated by a straight line, the **kernel trick** lets SVM behave as if it mapped the data into a higher dimension — without actually doing that expensive computation.
+
+```python
+from sklearn.svm import SVC
+
+poly_kernel_svm_clf = make_pipeline(
+    StandardScaler(),
+    SVC(kernel="poly", degree=3, coef0=1, C=5)
+)
+# Polynomial kernel: simulates adding polynomial features (x^2, x^3...) without computing them explicitly
+poly_kernel_svm_clf.fit(X, y)
+
+rbf_kernel_svm_clf = make_pipeline(
+    StandardScaler(),
+    SVC(kernel="rbf", gamma=5, C=0.001)
+)
+# RBF (Gaussian) kernel: measures similarity based on distance -- very flexible, curvy boundaries
+# gamma: controls how wiggly the boundary gets (higher gamma = more overfitting risk)
+rbf_kernel_svm_clf.fit(X, y)
+```
+
+## 3. SVM Regression
+
+SVM Regression flips the goal: instead of keeping points *out* of the margin, it tries to fit as many points as possible *inside* the margin.
+
+```python
+from sklearn.svm import LinearSVR
+
+svm_reg = make_pipeline(StandardScaler(), LinearSVR(epsilon=0.5, random_state=42))
+# epsilon: defines how wide the "tube" (margin) is -- points inside it don't count as errors
+
+svm_reg.fit(X, y)
+```
+
+## 4. Under the Hood (SVM Theory)
+
+The math behind "maximize the margin" turns out to be equivalent to **minimizing the size (norm) of the weight vector** `‖w‖`. A smaller `‖w‖` corresponds to a wider margin — so the optimization problem becomes: minimize `‖w‖` while still correctly classifying every point (or allowing some slack, for soft margin).
+
+## 5. The Dual Problem
+
+Some optimization problems (the **primal** problem) are hard to solve directly, so instead we transform them into a mathematically equivalent form called the **dual problem**, which is often easier or faster to solve.
+
+Why this matters for SVM specifically:
+- It lets us apply the **kernel trick** naturally (since the dual problem only needs dot products between data points, not the points themselves).
+- It's faster than the primal when the number of training samples is smaller than the number of features.
+
+Think of it like: "if the direct route is hard to compute, use a different but mathematically equivalent map that gets you the same answer, just more efficiently."
+
+## Quiz / New Learning
+
+Q: Why does increasing `gamma` in an RBF kernel SVM increase the risk of overfitting?
+
+A: A higher `gamma` makes each training point's "zone of influence" narrower, so the decision boundary bends tightly around individual points instead of capturing the broader pattern — memorizing the training data rather than generalizing to new data.
+
+## Reference
+- Official code examples: https://github.com/ageron/handson-ml3
