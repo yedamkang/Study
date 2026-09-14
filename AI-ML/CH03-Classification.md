@@ -152,6 +152,7 @@ clean_digit = knn_clf.predict([X_train_mod[0]])
 ## Quiz / New Learning
 
 Q: In a dataset where 90% of samples are "normal" and 10% are "anomaly", why is accuracy alone misleading? What should you look at instead?
+
 A: When 90% of the data is "normal", a model that always predicts "normal" gets 90% accuracy without learning anything useful — it's called the accuracy paradox. Instead, look at the confusion matrix, along with precision (of all predicted anomalies, how many were correct) and recall (of all actual anomalies, how many were caught). Often the F1 score (harmonic mean of the two) is used to summarize both in one number, especially with imbalanced data like this.
 
 ## Reference
